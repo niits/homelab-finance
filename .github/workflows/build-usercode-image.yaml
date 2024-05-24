@@ -20,5 +20,7 @@ jobs:
         file: dockerfiles/dagster.Dockerfile
         platforms: linux/arm64
         push: true
+        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/usercode:latest
+        cache-to: type=inline
         tags: |
           ${{ secrets.DOCKER_HUB_USERNAME }}/usercode:latest
