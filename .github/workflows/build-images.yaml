@@ -27,7 +27,7 @@ jobs:
       - uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/dagster.Dockerfile
+          file: dockerfiles/user_code.Dockerfile
           platforms: linux/arm64
           push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/usercode:latest

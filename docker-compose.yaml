@@ -1,31 +1,52 @@
+x-dagster-volumes: &dagster-volumes
+  - /tmp/io_manager_storage
+  - ./workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+  - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+x-dagster-postgres-env: &dagster-postgres-env
+  DAGSTER_POSTGRES_USER: "postgres_user"
+  DAGSTER_POSTGRES_PASSWORD: "postgres_password"
+  DAGSTER_POSTGRES_DB: "postgres_db"
+
 services:
+  minio:
+    ports:
+      - 9000:9000
+      - 9001:9001
+    container_name: minio
+    volumes:
+      - ./minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=ROOTNAME
+      - MINIO_ROOT_PASSWORD=CHANGEME123
+    image: quay.io/minio/minio:RELEASE.2024-05-10T01-41-38Z
+    command: server /data --console-address ":9001"
+
   postgresql:
-    image: postgres:11
-    container_name: postgresql
+    image: arm64v8/postgres:11.22-alpine
     environment:
       POSTGRES_USER: "postgres_user"
       POSTGRES_PASSWORD: "postgres_password"
       POSTGRES_DB: "postgres_db"
+    volumes:
+      - ./pg-data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
     networks:
       - network
+
   user_code:
-    build:
-      context: .
-      dockerfile: ./dockerfiles/user_code.Dockerfile
-    container_name: user_code
-    image: user_code_image
+    image: niits/usercode:latest
     restart: always
     environment:
-      DAGSTER_POSTGRES_USER: "postgres_user"
-      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
-      DAGSTER_POSTGRES_DB: "postgres_db"
-      DAGSTER_CURRENT_IMAGE: "user_code_image"
+      TPBANK_ACCOUNT_NUMBER: $TPBANK_ACCOUNT_NUMBER
+      TPBANK_PASSWORD: $TPBANK_PASSWORD
+      TPBANK_DEVICE_ID: $TPBANK_DEVICE_ID
+      DATABASE_DSN: postgresql://postgres_user:postgres_password@localhost:5432/postgres_db
+      <<: *dagster-postgres-env
     networks:
       - network
+
   webserver:
-    build:
-      context: .
-      dockerfile: ./dockerfiles/dagster.Dockerfile
+    image: niits/dagster:latest
     entrypoint:
       - dagster-webserver
       - -h
@@ -34,48 +55,38 @@ services:
       - "3000"
       - -w
       - workspace.yaml
-    container_name: webserver
     expose:
       - "3000"
     ports:
       - "3000:3000"
-    environment:
-      DAGSTER_POSTGRES_USER: "postgres_user"
-      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
-      DAGSTER_POSTGRES_DB: "postgres_db"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/io_manager_storage:/tmp/io_manager_storage
-      - ./workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
-      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+    environment: *dagster-postgres-env
+    volumes: *dagster-volumes
     networks:
       - network
     depends_on:
       - postgresql
       - user_code
+
   daemon:
-    build:
-      context: .
-      dockerfile: ./dockerfiles/dagster.Dockerfile
+    image: niits/dagster:latest
     entrypoint:
       - dagster-daemon
       - run
-    container_name: daemon
     restart: on-failure
-    environment:
-      DAGSTER_POSTGRES_USER: "postgres_user"
-      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
-      DAGSTER_POSTGRES_DB: "postgres_db"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/io_manager_storage:/tmp/io_manager_storage
-      - ./workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
-      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+    environment: *dagster-postgres-env
+    volumes: *dagster-volumes
     networks:
       - network
     depends_on:
       - postgresql
       - user_code
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - network
 
 networks:
   network:
