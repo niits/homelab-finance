@@ -8,7 +8,8 @@ setup(
         "dagster-aws==0.23.6",
         "dagster-postgres==0.23.6",
         "pandas==2.2.2",
-        "matplotlib==3.9.0"
+        "matplotlib==3.9.0",
+        "requests==2.32.1",
     ],
     extras_require={"dev": ["dagster-webserver", "pytest"]},
 )
