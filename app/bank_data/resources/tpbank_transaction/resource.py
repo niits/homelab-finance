@@ -100,9 +100,9 @@ class TPBankResource(ConfigurableResource):
         data = response.json()
 
         return TransactionData(
-            totalRows=data["totalRows"],
-            maxAcentrysmo=data["maxAcentrysmo"],
+            totalRows=data.get("totalRows"),
+            maxAcentrysmo=data.get("maxAcentrysmo"),
             transactionInfos=[
-                Transaction(**transaction) for transaction in data["transactionInfos"]
+                Transaction(**transaction) for transaction in data.get("transactionInfos", [])
             ],
         )

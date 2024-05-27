@@ -19,5 +19,5 @@ class Transaction(BaseModel):
 
 class TransactionData(BaseModel):
     totalRows: str
-    maxAcentrysmo: str
+    maxAcentrysmo: Optional[str]
     transactionInfos: List[Transaction]
