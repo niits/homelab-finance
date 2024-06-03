@@ -1,6 +1,5 @@
 import pandas as pd
 from dagster import (
-    DailyPartitionsDefinition,
     MetadataValue,
     OpExecutionContext,
     graph_asset,
@@ -36,8 +35,8 @@ def data_to_dataframe(
 
     data["bookingDate"] = pd.to_datetime(data["bookingDate"])
     data["valueDate"] = pd.to_datetime(data["valueDate"])
-    data["amount"] = data["amount"].astype(float)
-    data["runningBalance"] = data["runningBalance"].astype(float)
+    data["amount"] = data["amount"].astype(int)
+    data["runningBalance"] = data["runningBalance"].astype(int)
     data["updated_at"] = pd.Timestamp.now()
 
     context.add_output_metadata(
