@@ -11,6 +11,7 @@ from bank_data.partitions import daily_partitions
 from bank_data.resources.sql_database import DatabaseResource
 from bank_data.resources.tpbank_transaction import TPBankResource, TransactionData
 
+from uuid import uuid4
 
 @op
 def data_from_service(
@@ -29,6 +30,7 @@ def data_to_dataframe(
     data: TransactionData,
     db_engine: DatabaseResource,
 ) -> DataFrame:
+    batch_id = str(uuid4())
     data = pd.DataFrame.from_records(
         [transaction.model_dump() for transaction in data.transactionInfos]
     )
@@ -38,11 +40,13 @@ def data_to_dataframe(
     data["amount"] = data["amount"].astype(int)
     data["runningBalance"] = data["runningBalance"].astype(int)
     data["updated_at"] = pd.Timestamp.now()
+    data["batch_id"] = batch_id
 
     context.add_output_metadata(
         metadata={
             "num_rows": len(data),
             "preview": MetadataValue.md(data.head().to_markdown()),
+            "batch_id": batch_id,
         },
     )
 
