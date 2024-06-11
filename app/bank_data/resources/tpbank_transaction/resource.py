@@ -2,10 +2,9 @@ import json
 from datetime import datetime
 
 import requests
+from bank_data.resources.tpbank_transaction import Transaction, TransactionData
 from dagster import ConfigurableResource, InitResourceContext
 from pydantic import PrivateAttr
-
-from bank_data.resources.tpbank_transaction import Transaction, TransactionData
 
 TPBANK_BASE_URL = "https://ebank.tpb.vn/gateway/api"
 AUTH_ENDPOINT = "auth/login"
@@ -103,6 +102,7 @@ class TPBankResource(ConfigurableResource):
             totalRows=data.get("totalRows"),
             maxAcentrysmo=data.get("maxAcentrysmo"),
             transactionInfos=[
-                Transaction(**transaction) for transaction in data.get("transactionInfos", [])
+                Transaction(**transaction)
+                for transaction in data.get("transactionInfos", [])
             ],
         )

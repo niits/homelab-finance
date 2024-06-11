@@ -1,6 +1,5 @@
-from dagster import load_assets_from_modules
-
 from bank_data.assets import tpbank
+from dagster import load_assets_from_modules
 
 TPBANK = "tpbank"
 

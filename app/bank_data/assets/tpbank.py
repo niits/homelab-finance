@@ -1,17 +1,20 @@
+from uuid import uuid4
+
 import pandas as pd
+from bank_data.partitions import daily_partitions
+from bank_data.project import dbt_project
+from bank_data.resources.sql_database import DatabaseResource
+from bank_data.resources.tpbank_transaction import TPBankResource, TransactionData
 from dagster import (
+    AssetExecutionContext,
     MetadataValue,
     OpExecutionContext,
     graph_asset,
     op,
 )
+from dagster_dbt import DbtCliResource, dbt_assets
 from pandas import DataFrame
 
-from bank_data.partitions import daily_partitions
-from bank_data.resources.sql_database import DatabaseResource
-from bank_data.resources.tpbank_transaction import TPBankResource, TransactionData
-
-from uuid import uuid4
 
 @op
 def data_from_service(
@@ -54,6 +57,14 @@ def data_to_dataframe(
     return data
 
 
-@graph_asset(partitions_def=daily_partitions)
-def tpbank_transactions() -> DataFrame:
+@graph_asset(partitions_def=daily_partitions, key_prefix="tpbank")
+def transactions() -> DataFrame:
     return data_to_dataframe(data_from_service())
+
+
+@dbt_assets(manifest=dbt_project.manifest_path)
+def dbt_assets(
+    context: AssetExecutionContext,
+    dbt: DbtCliResource,
+):
+    yield from dbt.cli(["build"], context=context).stream()
