@@ -7,13 +7,19 @@ from sqlalchemy.exc import SQLAlchemyError
 
 st.set_page_config(layout="wide")
 
-
 st.title("Data labeling app")
 
 
+query = """
+SELECT t.*
+FROM   public.stg_tpbank__transactions t
+       LEFT JOIN stg_tpbank__transaction_categories c
+              ON c.id = t.id
+WHERE  c.id IS NULL
+"""
+
 posgres_dns = os.environ.get(
     "POSTGRES_DNS",
-    "postgresql://postgres_user:postgres_password@100.84.105.12:5432/bank_data",
 )
 if not posgres_dns:
     st.error("No Postgres DNS found")
@@ -67,7 +73,7 @@ categories = {
 }
 if "df" not in st.session_state:
     df = pd.read_sql_query(
-        'select id, description, "valueDate", amount from "stg_tpbank__transactions"',
+        query,
         con=engine,
     )
     st.session_state.df = df

@@ -1,7 +1,7 @@
 with
     renamed as (
         select
-            {{ adapter.quote("id") }},
+            cast({{ adapter.quote("id") }} as bigint) as id,
             {{ adapter.quote("arrangementId") }},
             {{ adapter.quote("reference") }},
             {{ adapter.quote("xref") }},

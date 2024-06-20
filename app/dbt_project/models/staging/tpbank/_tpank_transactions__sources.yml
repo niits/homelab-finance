@@ -5,3 +5,4 @@ sources:
     schema: public
     tables:
       - name: transactions
+      - name: transaction_categories
