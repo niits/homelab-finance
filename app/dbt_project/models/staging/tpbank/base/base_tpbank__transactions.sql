@@ -1,5 +1,4 @@
 with
-    snapshots as (select * from {{ ref("transaction_snapshots") }}),
     renamed as (
         select
             {{ adapter.quote("id") }},
@@ -18,7 +17,7 @@ with
             end as amount,
             {{ adapter.quote("currency") }},
             {{ adapter.quote("updated_at") }}
-        from snapshots
+        from {{ source("tpbank", "transactions") }}
     )
 select *
 from renamed
