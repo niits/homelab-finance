@@ -2,12 +2,25 @@ import os
 
 import pandas as pd
 import streamlit as st
+from dagster_graphql import DagsterGraphQLClientError
+from dagster_graphql.client import DagsterGraphQLClient
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
 st.set_page_config(layout="wide")
 
 st.title("Data labeling app")
+
+DAGSTER_HOST = os.environ.get("DAGSTER_HOST")
+
+if not DAGSTER_HOST:
+    st.error("No Dagster host or port found")
+    st.stop()
+
+client = DagsterGraphQLClient(
+    DAGSTER_HOST,
+    port_number=3000,
+)
 
 
 query = """
@@ -123,3 +136,15 @@ if button:
         index=False,
     )
     st.success("Data saved")
+
+    try:
+        new_run_id: str = client.submit_job_execution(
+            "tpbank_transactions_transform_job",
+            run_config={},
+        )
+        st.success(f"Submitted job with run_id: {new_run_id}")
+        st.markdown(
+            f"View the run [here](http://{DAGSTER_HOST}:3000/runs/{new_run_id})"
+        )
+    except DagsterGraphQLClientError as exc:
+        st.error(f"Error submitting job: {exc}")

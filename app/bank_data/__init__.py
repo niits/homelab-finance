@@ -15,14 +15,18 @@ dbt = DbtCliResource(project_dir=dbt_project)
 )
 
 
-from bank_data.assets import tpbank_assets
-from bank_data.jobs import tpbank_transactions_import_schedule
+from bank_data.assets import tpbank_assets, updated_transactions_assets
+from bank_data.jobs import (
+    tpbank_transactions_import_job,
+    tpbank_transactions_import_schedule,
+    tpbank_transactions_transform_job,
+)
 from bank_data.resources.sql_database import DatabaseResource
 from bank_data.resources.tpbank_transaction import TPBankResource
 from dagster import Definitions, EnvVar
 
 defs = Definitions(
-    assets=[*tpbank_assets],
+    assets=tpbank_assets + updated_transactions_assets,
     resources={
         "tpbank_connection": TPBankResource(
             account_number=EnvVar("TPBANK_ACCOUNT_NUMBER"),
@@ -33,4 +37,5 @@ defs = Definitions(
         "dbt": dbt,
     },
     schedules=[tpbank_transactions_import_schedule],
+    jobs=[tpbank_transactions_import_job, tpbank_transactions_transform_job],
 )

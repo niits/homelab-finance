@@ -28,4 +28,5 @@ jobs:
           script: |
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/usercode:latest && \
                 docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/dagster:latest && \
+                docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ui:latest && \
                 docker compose -f ${{ secrets.SERVER_COMPOSE_DIR }}/docker-compose.yaml up -d
