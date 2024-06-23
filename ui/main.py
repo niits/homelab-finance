@@ -56,6 +56,8 @@ categories = {
         "Được trả nợ",
         "Đi vay",
         "Được hoàn tiền",
+        "Đầu tư: bán tài sản",
+
     ],
     "outcome": [
         "Ăn uống: Nhà hàng và Cà phê",
@@ -64,6 +66,8 @@ categories = {
         "Dịch vụ và hoá đơn: Tiền nhà",
         "Dịch vụ và hoá đơn: Dịch vụ Cloud",
         "Dịch vụ và hoá đơn: Thanh toán thẻ tín dụng",
+        "Dịch vụ và hoá đơn: Điện thoại và Internet",
+        "Dịch vụ và hoá đơn: Sửa chữa",
         "Di chuyển: Taxi và Grab",
         "Di chuyển: Xăng dầu và Bảo dưỡng xe",
         "Mua sắm: Quần áo và Giày dép",
